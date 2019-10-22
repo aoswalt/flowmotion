@@ -42,6 +42,11 @@ defmodule CounterWorkflow do
   end
 
   @impl Flowmotion.Workflow
+  def value(state) do
+    state.count
+  end
+
+  @impl Flowmotion.Workflow
   def on_error(state) do
     Logger.warn("handling error")
 

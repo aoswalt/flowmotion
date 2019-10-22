@@ -6,6 +6,7 @@ defmodule Flowmotion.Workflow do
 
   @callback new(any) :: Next.t()
   @callback step(any, state) :: Next.t()
+  @callback value(state) :: any
 
   @callback on_error(state) :: Next.t()
 

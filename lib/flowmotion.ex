@@ -5,7 +5,7 @@ defmodule Flowmotion do
   def start(
         workflow_module,
         arg \\ nil,
-        storage \\ Application.get_env(:flowmotion, :storage_module, EtsStorage)
+        storage \\ default_storage()
       ) do
     storage.new_instance(workflow_module, arg)
   end
@@ -13,7 +13,7 @@ defmodule Flowmotion do
   def call(
         instance_id,
         message,
-        storage \\ Application.get_env(:flowmotion, :storage_module, EtsStorage)
+        storage \\ default_storage()
       ) do
     instance = storage.get_instance(instance_id)
 
@@ -45,6 +45,16 @@ defmodule Flowmotion do
     else
       {:error, InstanceNotFoundError.exception(instance_id)}
     end
+  end
+
+  def value(instance_id, storage \\ default_storage()) do
+    instance_id
+    |> storage.get_instance()
+    |> Instance.value()
+  end
+
+  defp default_storage() do
+    Application.get_env(:flowmotion, :storage_module, EtsStorage)
   end
 end
 

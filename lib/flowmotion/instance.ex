@@ -43,6 +43,11 @@ defmodule Flowmotion.Instance do
     %{instance | status: status, state: state}
   end
 
+  @spec value(t) :: any
+  def value(instance) do
+    instance.workflow_module.value(instance.state)
+  end
+
   # @spec call_workflow(t, any) :: Next.t
   # def call_workflow(instance, message) do
   #   instance.module.setp(instance.state)
