@@ -25,6 +25,9 @@ defmodule Flowmotion.Instance do
   @spec errored?(t) :: boolean
   def errored?(instance), do: instance.status == :errored
 
+  @spec done?(t) :: boolean
+  def done?(instance), do: instance.status == :done
+
   @spec new(id, module, Next.t()) :: t
   def new(id, workflow_module, next) do
     %Instance{
@@ -37,10 +40,17 @@ defmodule Flowmotion.Instance do
 
   @spec update(t, Next.t()) :: t
   def update(instance, next) do
-    status = Next.status(next)
-    state = Next.state(next)
+    %{instance | status: Next.status(next), state: Next.state(next)}
+  end
 
-    %{instance | status: status, state: state}
+  @spec on_error(t) :: t
+  def on_error(%{status: :errored} = instance) do
+    if function_exported?(instance.workflow_module, :on_error, 1) do
+      next = instance.workflow_module.on_error(instance)
+      update(instance, next)
+    else
+      instance
+    end
   end
 
   @spec value(t) :: any
@@ -48,8 +58,8 @@ defmodule Flowmotion.Instance do
     instance.workflow_module.value(instance.state)
   end
 
-  # @spec call_workflow(t, any) :: Next.t
-  # def call_workflow(instance, message) do
-  #   instance.module.setp(instance.state)
-  # end
+  @spec call(t, any) :: Next.t()
+  def call(instance, message) do
+    instance.workflow_module.step(message, instance.state)
+  end
 end
